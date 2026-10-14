@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'mysql2'; 
 import { DataSource, DataSourceOptions, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 import path from 'path';
 import { User } from '@/entities/User';
