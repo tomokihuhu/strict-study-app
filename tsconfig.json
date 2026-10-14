@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2017",
+    "experimentalDecorators": true,      // 👈 これを追加（@の書き方を許可）
+    "emitDecoratorMetadata": true,       // 👈 これを追加（型の詳細な連携を許可）
+    "strictPropertyInitialization": false, // 👈 これを追加（初期値がないエラーを防ぐ）
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
