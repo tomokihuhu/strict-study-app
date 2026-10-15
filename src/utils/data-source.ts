@@ -2,9 +2,9 @@ import 'reflect-metadata';
 import 'mysql2'; 
 import { DataSource, DataSourceOptions, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 import path from 'path';
-import { User } from '@/entities/User';
-import { StudyRecord } from '@/entities/StudyRecord';
-import { StudyRecordLike } from '@/entities/StudyRecordLike';
+import { User } from '../entities/User';
+import { StudyRecord } from '../entities/StudyRecord';
+import { StudyRecordLike } from '../entities/StudyRecordLike';
 
 const dbUrl = process.env.POSTGRES_URL;
 
