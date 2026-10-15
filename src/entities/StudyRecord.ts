@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn,} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn, type Relation} from 'typeorm';
 import { User } from './User';
 import { StudyRecordLike } from './StudyRecordLike';
 
@@ -27,11 +27,11 @@ export class StudyRecord {
 
     @ManyToOne(() => User, (user: User) => user.studyRecords)
     @JoinColumn({ name: 'userId' })
-    user!: User;
+    user!: Relation<User>;
 
     @Column()
     userId!: number;
 
     @OneToMany(() => StudyRecordLike, (like: StudyRecordLike) => like.studyRecord)
-    likes!: StudyRecordLike[];
+    likes!: Relation<StudyRecordLike>[];
 }

@@ -5,6 +5,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     OneToMany,
+    Relation
 }  from 'typeorm';
 import { StudyRecord } from './StudyRecord';
 import { StudyRecordLike } from './StudyRecordLike';
@@ -38,9 +39,8 @@ export class User {
     updatedAt!: Date;
 
     @OneToMany(() => StudyRecord, (studyRecord: StudyRecord) => studyRecord.user)
-    studyRecords!: StudyRecord[];
+    studyRecords!: Relation<StudyRecord>[];
 
-    // 💡 修正2: 同様に () => に変更し、配列の型も StudyRecordLike に直す
     @OneToMany(() => StudyRecordLike, (like: StudyRecordLike) => like.user)
-    likes!: StudyRecordLike[];
+    likes!: Relation<StudyRecordLike>[];
 }
