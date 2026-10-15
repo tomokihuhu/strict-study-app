@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn,} from 'typeorm';
-import type { User } from './User';
-import type { StudyRecordLike } from './StudyRecordLike';
+import { User } from './User';
+import { StudyRecordLike } from './StudyRecordLike';
 
 @Entity('study_records')
 export class StudyRecord {
@@ -25,13 +25,13 @@ export class StudyRecord {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @ManyToOne('User', (user: User) => user.studyRecords)
+    @ManyToOne(() => User, (user: User) => user.studyRecords)
     @JoinColumn({ name: 'userId' })
     user!: User;
 
     @Column()
     userId!: number;
 
-    @OneToMany('StudyRecordLike', (like: StudyRecordLike) => like.studyRecord)
+    @OneToMany(() => StudyRecordLike, (like: StudyRecordLike) => like.studyRecord)
     likes!: StudyRecordLike[];
 }
