@@ -37,16 +37,17 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { subject, duration, isSuccess, memo } = body;
 
-        const record = new StudyRecord();
-        record.subject = subject;
-        record.duration = duration;
-        record.isSuccess = (isSuccess === true || isSuccess === "true" || isSuccess === 1);
-        record.memo = memo;
+        const newRecordData = {
+            subject: subject,
+            duration: duration,
+            isSuccess: (isSuccess === true || isSuccess === "true" || isSuccess === 1),
+            memo: memo,
+            userId: Number((session.user as any).id)
+        };
         
-        // 💡 認証を通った本人のIDをセット！
-        record.userId = Number((session.user as any).id);
+        const result = await AppDataSource.manager.insert(StudyRecord, newRecordData);
 
-        await AppDataSource.manager.save(record);
+        const record = { ...newRecordData, id: result.identifiers[0].id };
 
         return NextResponse.json({ message: '記録の保存に成功しました！', record }, { status: 201 });
         
@@ -138,7 +139,7 @@ export async function DELETE(req: Request) {
             return NextResponse.json({ error: '他人の記録の削除はできません'}, { status: 404});
         }
 
-        await recordRepository.remove(targetRecord);
+        await recordRepository.delete(targetRecord);
 
         return NextResponse.json({ message: '記録を削除しました'}, { status: 200});
     } catch (error) {
