@@ -17,7 +17,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { name, bio } = body; // 💡 ちょっとした小技: こうやって1行にまとめられます
+        const { name, bio, avatarUrl } = body;
 
         const userRepository = AppDataSource.getRepository(User);
 
@@ -29,9 +29,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'ユーザーが見つかりません'}, {status: 404});
         }
 
-        user.userName = name;
-        user.bio = bio;
-
+        const updateData: any = {
+            userName: name,
+            bio: bio,
+        };
+        
+        // 画像がセットされている場合のみ更新対象に追加
+        if (avatarUrl !== undefined) {
+            updateData.avatarUrl = avatarUrl;
+        }
+        
         await userRepository.save(user);
         return NextResponse.json({ message: 'プロフィールを更新しました', user});
     } catch (error) {
