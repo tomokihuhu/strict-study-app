@@ -24,7 +24,7 @@ export class User {
     @Column()
     password!: string;
 
-    @Column({ type: 'varchar', nullable: true})
+    @Column({type: 'longtext',nullable: true})
     avatarUrl!: string | null;
 
     @Column({ type: 'varchar', length: 140, nullable: true })
