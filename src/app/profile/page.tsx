@@ -64,8 +64,24 @@ export default function ProfilePage() {
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            // Base64形式の文字列として保存
-            setPreviewUrl(reader.result as string);
+            // 画像を圧縮するための処理
+            const img = new window.Image(); // 💡 エラー回避のため window.Image に
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                // プロフィール画像用に最大幅を300pxに縮小
+                const MAX_WIDTH = 300; 
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // JPEG形式で画質を70%に落とし、データサイズを劇的に軽くする
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                setPreviewUrl(compressedBase64);
+            };
+            img.src = reader.result as string;
         };
         reader.readAsDataURL(selectedFile);
     };
