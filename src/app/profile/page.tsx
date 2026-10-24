@@ -8,7 +8,6 @@ export default function ProfilePage() {
     const router = useRouter();
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
     const [name, setName] = useState('');
     const [bio, setBio] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -43,7 +42,7 @@ export default function ProfilePage() {
             const response = await fetch('/api/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json'},
-                body: JSON.stringify({ name, bio }),
+                body: JSON.stringify({ name, bio , avatarUrl: previewUrl}),
             })
 
             if (!response.ok) {
@@ -63,36 +62,12 @@ export default function ProfilePage() {
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) return;
 
-        setFile(selectedFile);
-
-        setPreviewUrl(URL.createObjectURL(selectedFile));
-    };
-
-    const handleUpload = async () => {
-        if (!file) return;
-        setIsUploading(true);
-
-        try {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            const response = await fetch('/api/user/avatar', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error('アップロード失敗');
-            }
-
-            const data = await response.json();
-            alert('アップロード成功！ CloudinaryのURL: ' + data.avatarUrl);
-        } catch (error) {
-            console.error(error);
-            alert('エラーが発生しました');
-        } finally {
-            setIsUploading(false);
-        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            // Base64形式の文字列として保存
+            setPreviewUrl(reader.result as string);
+        };
+        reader.readAsDataURL(selectedFile);
     };
 
     return (
@@ -101,9 +76,7 @@ export default function ProfilePage() {
                 プロフィール設定
             </h2>
 
-            {/* --- 💡 2. 消えていた画像アップロードUIを復活 --- */}
             <div className="mb-6">
-                {/* 補足: h-32 を足してアイコン枠が綺麗な丸になるように微調整しました */}
                 <div className="w-32 h-32 bg-neutral-800 rounded-full mb-4 overflow-hidden flex items-center justify-center border-2 border-neutral-700">
                     {previewUrl ? (
                         <img src={previewUrl} alt="プレビュー" className="w-full h-full object-cover"/>
@@ -121,23 +94,10 @@ export default function ProfilePage() {
                         file:rounded-full file:border-0
                         file:text-sm file:font-bold
                         file:bg-blue-600 file:text-white
-                        hover:file:bg-blue-500 cursor-pointer
-                    "
+                        hover:file:bg-blue-500 cursor-pointer"
                 />
             </div>
 
-            <button 
-                onClick={handleUpload}
-                disabled={!file || isUploading}
-                className={`px-6 py-2 rounded-full font-bold transition-all ${
-                    !file || isUploading
-                    ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed'
-                    : 'bg-neutral-600 hover:bg-green-500 text-white shadow-lg'
-                }`}
-            >
-                {isUploading ? '送信中...': 'アップロード'}
-            </button>
-            
             <div className="mt-12 pt-8 border-neutral-800">
                 <h3 className="text-lg font-bold text-neutral-300 mb-6">基本情報</h3>
 
