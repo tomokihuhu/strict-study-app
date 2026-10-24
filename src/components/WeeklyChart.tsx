@@ -1,161 +1,78 @@
 'use client';
 
-import { useState } from 'react'; // 💡 useRef と useEffect は削除しました
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartOptions
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { useState, useEffect } from 'react';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+export default function StudyCalendar() {
+    const [records, setRecords] = useState<any[]>([]);
+    const [currentDate, setCurrentDate] = useState(new Date());
 
-export default function WeeklyChart() {
-  const [period, setPeriod] = useState<'week' | 'month'>('week');
+    useEffect(() => {
+        const fetchRecords = async () => {
+            try {
+                const res = await fetch('/api/record');
+                if (res.ok) {
+                    const data = await res.json();
+                    setRecords(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch records', error);
+            }
+        };
+        fetchRecords();
+    }, []);
 
-  // 1. ダミーデータの生成（状態管理せずにそのまま計算します）
-  let labels: string[] = [];
-  let studyData: (number | null)[] = [];
+    // カレンダーの計算ロジック
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
 
-  if (period === 'week') {
-    // 💡 動的な日付計算ロジックに差し替え
-    const today = new Date();
-    
-    // 今日の曜日を 1(月) 〜 7(日) に変換
-    let currentDayOfWeek = today.getDay();
-    if (currentDayOfWeek === 0) currentDayOfWeek = 7;
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
 
-    // 今週の「月曜日」の正確な日付を割り出す
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - currentDayOfWeek + 1);
+    // その日に勉強記録があるか判定
+    const hasRecord = (day: number) => {
+        const targetDate = new Date(year, month, day).toDateString();
+        return records.some(record => new Date(record.createdAt).toDateString() === targetDate);
+    };
 
-    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+    const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+    const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
-    for (let i = 0; i < 7; i++) {
-      // 月曜日の日付に 0〜6日 を順番に足していく
-      const targetDate = new Date(monday);
-      targetDate.setDate(monday.getDate() + i);
+    return (
+        <div className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-5 shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+                <button onClick={prevMonth} className="text-neutral-500 hover:text-neutral-300 px-3 py-1 font-bold transition">
+                    &lt;
+                </button>
+                <h3 className="text-neutral-200 font-bold text-sm tracking-wider uppercase">
+                    {year} / {month + 1}
+                </h3>
+                <button onClick={nextMonth} className="text-neutral-500 hover:text-neutral-300 px-3 py-1 font-bold transition">
+                    &gt;
+                </button>
+            </div>
 
-      const month = targetDate.getMonth() + 1;
-      const date = targetDate.getDate();
-      const dayStr = dayNames[targetDate.getDay()];
+            <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-neutral-500 mb-2">
+                <div className="text-red-400">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div className="text-blue-400">Sat</div>
+            </div>
 
-      // 「9/23(水)」のようなラベルを作成
-      labels.push(`${month}/${date}(${dayStr})`);
-
-      // 今日以前ならダミーの実績、明日以降なら null
-      if (i < currentDayOfWeek) {
-        // ※とりあえず見栄えが良いようにランダムな数字を入れています（後でAPIに繋ぎます！）
-        studyData.push(Math.floor(Math.random() * 100) + 20); 
-      } else {
-        studyData.push(null);
-      }
-    }
-  } else {
-    // 1ヶ月（過去30日）のデータ（ここはそのまま）
-    labels = Array.from({ length: 30 }, (_, i) => `${i + 1}日`);
-    studyData = Array.from({ length: 30 }, () => Math.floor(Math.random() * 120));
-  }
-
-  // 2. chartDataの定義
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        label: '勉強時間 (分)',
-        data: studyData,
-        // 💡 シンプルな単色（先ほど設定されていた水色）に変更
-        backgroundColor: 'rgb(64, 69, 146)',
-        
-        // 💡 棒にホバーした時だけ少し色を濃くするとリッチになります
-        hoverBackgroundColor: 'rgb(84, 85, 156)', 
-        
-        borderRadius: 6,
-        borderSkipped: false,
-        barThickness: period === 'week' ? 24 : 6,
-      },
-    ],
-  };
-
-  // 3. オプション定義（型エラー解消済みのもの）
-  const options: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(23, 23, 23, 0.9)',
-        titleColor: '#a3a3a3',
-        bodyColor: '#fff',
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: false,
-        callbacks: {
-          label: (context: any) => `${context.parsed.y} 分`
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        border: { display: false },
-        grid: { color: '#262626' }, 
-        ticks: { color: '#737373', padding: 10 }
-      },
-      x: {
-        grid: { display: false },
-        ticks: {
-          color: (context: any) => {
-            const label = context.tick.label;
-            if (label.includes('(土)')) return '#60a5fa';
-            if (label.includes('(日)')) return '#f87171';
-            return '#737373';
-          },
-          font: { size: 11, weight: 'bold' }
-        }
-      }
-    },
-    animation: {
-      duration: 1000,
-      easing: 'easeOutQuart'
-    }
-  };
-
-  return (
-    <div className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-5 shadow-2xl">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-neutral-200 font-bold text-sm tracking-wider uppercase">
-          Activity
-        </h3>
-        <div className="flex bg-neutral-900 rounded-lg p-1 border border-neutral-800">
-          <button
-            onClick={() => setPeriod('week')}
-            className={`px-3 py-1 text-xs font-bold rounded-md transition-all duration-300 ${
-              period === 'week' ? 'bg-neutral-700 text-white shadow' : 'text-neutral-500 hover:text-neutral-300'
-            }`}
-          >
-            今週
-          </button>
-          <button
-            onClick={() => setPeriod('month')}
-            className={`px-3 py-1 text-xs font-bold rounded-md transition-all duration-300 ${
-              period === 'month' ? 'bg-neutral-700 text-white shadow' : 'text-neutral-500 hover:text-neutral-300'
-            }`}
-          >
-            1ヶ月
-          </button>
+            <div className="grid grid-cols-7 gap-2">
+                {blanks.map(blank => (
+                    <div key={`blank-${blank}`} className="h-10"></div>
+                ))}
+                {days.map(day => (
+                    <div key={day} className="h-10 flex flex-col items-center justify-center relative">
+                        <span className={`text-sm font-medium ${hasRecord(day) ? 'text-white' : 'text-neutral-400'}`}>
+                            {day}
+                        </span>
+                        {/* 勉強記録があれば青いドットを表示 */}
+                        {hasRecord(day) && (
+                            <span className="absolute bottom-1 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
-      </div>
-
-      <div className="h-48 w-full">
-        {/* 💡 && の条件を外し、そのままデータを渡します */}
-        <Bar data={chartData} options={options} />
-      </div>
-    </div>
-  );
+    );
 }

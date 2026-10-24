@@ -16,7 +16,6 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            // 修正③: 先頭に / を追加
             const res = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json'},
@@ -36,15 +35,17 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="bg-white p-8 rounded shadow-md w-96">
-                <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">新規登録</h1>
+        <div className="min-h-screen flex items-center justify-center bg-black p-4">
+            <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-2xl p-8 shadow-2xl">
+                <h1 className="text-2xl font-bold text-neutral-200 mb-6 text-center tracking-wider">
+                    新規登録
+                </h1>
 
-                {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
+                {error && <p className="text-red-400 mb-4 text-sm font-bold text-center">{error}</p>}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-xs font-bold text-neutral-400 mb-2 uppercase">
                             ユーザー名
                         </label>
                         <input
@@ -52,11 +53,11 @@ export default function RegisterPage() {
                             value={userName}
                             onChange={(e) => setUserName(e.target.value)}
                             required
-                            className="mt-1 block w-full border border-gray-300 rounded p-2 text-gray-900"
+                            className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-neutral-200 focus:outline-none focus:border-neutral-600 transition"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-xs font-bold text-neutral-400 mb-2 uppercase">
                             メールアドレス
                         </label>
                         <input
@@ -64,34 +65,31 @@ export default function RegisterPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="mt-1 block w-full border border-gray-300 rounded p-2 text-gray-900"
+                            className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-neutral-200 focus:outline-none focus:border-neutral-600 transition"
                         />
                     </div>
                     <div>
-                        {/* 修正②: clock を block に変更 */}
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-xs font-bold text-neutral-400 mb-2 uppercase">
                             パスワード
                         </label>
-                        {/* 修正①: type="text" を type="password" に変更 */}
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="mt-1 block w-full border border-gray-300 rounded p-2 text-gray-900"
+                            className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-neutral-200 focus:outline-none focus:border-neutral-600 transition"
                         />
                     </div>
                     <button 
                         type="submit"
-                        className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+                        className="w-full bg-white text-black font-bold py-3 px-4 rounded-lg hover:bg-neutral-200 transition-colors mt-2"
                     >
                         登録する
                     </button>
                 </form>
 
-                {/* 修正④: このブロックを白いカードの </div> の内側に入れました */}
-                <div className="mt-4 text-center">
-                    <Link href="/login" className="text-blue-500 text-sm hover:underline">
+                <div className="mt-6 text-center">
+                    <Link href="/login" className="text-sm text-neutral-500 hover:text-neutral-300 transition">
                         既にアカウントをお持ちの方はこちら                
                     </Link>
                 </div>
