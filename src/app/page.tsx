@@ -77,7 +77,7 @@ export default function DashboardPage() {
         if (status === 'authenticated') {
             fetchRecords();
 
-            fetch('/api/profile')
+            fetch('/api/profile', { cache: 'no-store' })
                 .then((res) => (res.ok ? res.json() : null))
                 .then((data) => {
                     if(data) setProfile(data);
