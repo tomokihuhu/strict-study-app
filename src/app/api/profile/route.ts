@@ -38,8 +38,8 @@ export async function POST(req: Request) {
         if (avatarUrl !== undefined) {
             updateData.avatarUrl = avatarUrl;
         }
-        
-        await userRepository.save(user);
+
+        await userRepository.update(user.id, updateData);
         return NextResponse.json({ message: 'プロフィールを更新しました', user});
     } catch (error) {
         console.error('プロフィール更新エラー:', error);
